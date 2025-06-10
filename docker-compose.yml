@@ -1,0 +1,6 @@
+services:
+  app:
+    build: ./project
+    container_name: app-java
+    ports:
+      - "8080:8080"
