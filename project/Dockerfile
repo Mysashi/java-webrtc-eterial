@@ -4,6 +4,7 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
 COPY src ./src
+COPY src/main/resources/keystore.jks ./src/main/resources/keystore.jks
 
 RUN gradle clean build --no-daemon
 
