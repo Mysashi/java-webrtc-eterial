@@ -34,28 +34,24 @@ navigator.mediaDevices.getUserMedia({video: false, audio: true}) // Настра
 function connect() {
     const socket = new SockJS('/socket', {debug: false}); // подключение к сокету спринга
     stompClient =  Stomp.over(socket);
-    localId = $("#name").val(); // включаем STOMP
     stompClient.connect({}, frame => {
     console.log('Connected: ' + frame);
     setConnected(true);
     // localId = 
     
     stompClient.subscribe('/topic/call', (call) => { // подписываемся на тему звонка(чтобы в будущем определить другие пиры)
-        remoteId = call.body;
+        
         console.log("Remote id:", remoteId);
         
         let localId = $("#name").val();
 
         localPeer.ontrack = (event) => {
             console.log("Received remote track:", event.track.kind);
-            // For audio-only:
-            const audio = new Audio();
-            audio.srcObject = event.streams[0];
-            audio.play();
           };
 
 
         localPeer.onicecandidate = (event) => {
+            remoteId = call.body;
             if (event.candidate) {
                 var candidate = {
                     type: "candidate",
@@ -65,7 +61,7 @@ function connect() {
                 console.log("Sending Candidate")
                 console.log(candidate)
                 stompClient.send("/app/candidate", {}, JSON.stringify({
-                    "toUser": remoteId,
+                    "toUser": call.body,
                     "fromUser": localId,
                     "candidate": candidate
                 }))
@@ -107,17 +103,10 @@ function connect() {
         // console.log(offer.body)
         // console.log(new RTCSessionDescription(o))
         // console.log(typeof (new RTCSessionDescription(o)))
-        localStream.getTracks().forEach(track => {
-            localPeer.addTrack(track, localStream);
-        });
         console.log("Offer came")
 
         localPeer.ontrack = (event) => {
             console.log("Received remote track:", event.track.kind);
-            // For audio-only:
-            const audio = new Audio();
-            audio.srcObject = event.streams[0];
-            audio.play();
           };
 
 
@@ -138,6 +127,10 @@ function connect() {
                     }))
                 }
             }
+
+            localStream.getTracks().forEach(track => {
+                localPeer.addTrack(track, localStream);
+        });
            
             localId = $("#name").val();
             var o = JSON.parse(offer.body)["offer"]
@@ -166,7 +159,7 @@ function connect() {
             console.log("Answer Came")
             localId = $("#name").val();
            
-                var o = JSON.parse(answer.body)["answer"]
+            var o = JSON.parse(answer.body)["answer"]
             console.log(o)
             localPeer.setRemoteDescription(new RTCSessionDescription(o))
 
@@ -179,7 +172,7 @@ function connect() {
             console.log("Candidate Came")
             var o = JSON.parse(answer.body)["candidate"]
             console.log(o)
-            console.log(o["label"])
+            console.log(o["lable"])
             console.log(o["id"])
             var iceCandidate = new RTCIceCandidate({
                 sdpMLineIndex: o["lable"],
