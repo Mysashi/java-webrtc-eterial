@@ -58,8 +58,9 @@ public class SocketController {
 
     @MessageMapping("/offer") 
     public void offer(String offer) {
-        System.out.println("Offer Came");
+        System.out.println("offer :" + offer);
         JSONObject jsonObject = new JSONObject(offer);
+        System.out.println(jsonObject);
         simpMessagingTemplate.convertAndSend("/topic/offer",offer);
         System.out.println("Offer were sent");
     }
