@@ -42,36 +42,39 @@ function connect() {
     
     stompClient.subscribe('/topic/call', (call) => { // подписываемся на тему звонка(чтобы в будущем определить другие пиры)
         remoteId = call.body;
-        console.log("Remote id:", remoteId);
+        console.log("Remote id:", remoteId)
         
         let localId = $("#name").val();
+        if (call.body != localId) {
+         localPeer.ontrack = (event) => {
+                    console.log("Received remote track:", event.track.kind);
+                    // For audio-only:
+                    const audio = new Audio();
+                    audio.srcObject = event.streams[0];
+                    audio.play();
+                  };
 
-        localPeer.ontrack = (event) => {
-            console.log("Received remote track:", event.track.kind);
-            // For audio-only:
-            const audio = new Audio();
-            audio.srcObject = event.streams[0];
-            audio.play();
-          };
 
-
-        localPeer.onicecandidate = (event) => {
-            if (event.candidate) {
-                var candidate = {
-                    type: "candidate",
-                    lable: event.candidate.sdpMLineIndex,
-                    id: event.candidate.candidate,
+                localPeer.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        var candidate = {
+                            type: "candidate",
+                            lable: event.candidate.sdpMLineIndex,
+                            id: event.candidate.candidate,
+                        }
+                        console.log("Sending Candidate")
+                        console.log(candidate)
+                        stompClient.send("/app/candidate", {}, JSON.stringify({
+                            "toUser": remoteId,
+                            "fromUser": localId,
+                            "candidate": candidate
+                        }))
+                    }
                 }
-                console.log("Sending Candidate")
-                console.log(candidate)
-                stompClient.send("/app/candidate", {}, JSON.stringify({
-                    "toUser": remoteId,
-                    "fromUser": localId,
-                    "candidate": candidate
-                }))
-            }
+
         }
-       
+
+
         if (call.body != localId) {
             console.log("local peer")
     

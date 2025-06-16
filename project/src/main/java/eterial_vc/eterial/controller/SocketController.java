@@ -44,7 +44,7 @@ public class SocketController {
         System.out.println(jsonObject.get("toUser"));
         System.out.println(jsonObject.get("fromUser"));
         System.out.println(jsonObject.get("candidate"));
-        simpMessagingTemplate.convertAndSendToUser(jsonObject.getString("toUser"),"/topic/candidate",candidate);
+        simpMessagingTemplate.convertAndSend("/topic/candidate",candidate);
         System.out.println("Candidate Sent");
 
 
